@@ -1,25 +1,49 @@
 const nomeProdotto = document.getElementById("nomeProdotto");
 const nomeBrand = document.getElementById("nomeBrand");
-const Prezzo = document.getElementById("Prezzo");
+const prezzo = document.getElementById("Prezzo");
 const URLImg = document.getElementById("URLImg");
 const descrizioneProdotto = document.getElementById("descrizioneProdotto");
 const btnSave = document.getElementById("btnSave");
 const btnReset = document.getElementById("btnReset");
 const btnDelete = document.getElementById("btnDelete");
+const myForm = document.getElementById("myform");
 
-let URL = "https://striveschool-api.herokuapp.com/api/product/";
+let URLAddress = "https://striveschool-api.herokuapp.com/api/product/";
 let URLKey =
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2NzViZmQwYmQyMjA3MTAwMTVkZTJmNDkiLCJpYXQiOjE3MzQwODE4MDMsImV4cCI6MTczNTI5MTQwM30.MvVYRlpAb2dnmbpT8SinCgKVFIUyMWtby-iyl0Y_a84";
+  "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2NzViZmQwYmQyMjA3MTAwMTVkZTJmNDkiLCJpYXQiOjE3MzQwODE4MDMsImV4cCI6MTczNTI5MTQwM30.MvVYRlpAb2dnmbpT8SinCgKVFIUyMWtby-iyl0Y_a84";
 
-class Products {
-  constructor(_name, _description, _brand, _imageUrl, _price, _id) {
+class product {
+  constructor(_name, _description, _brand, _imageUrl, _price) {
     this.name = _name;
     this.description = _description;
     this.brand = _brand;
-    this.imgageUrl = _imageUrl;
+    this.imageUrl = _imageUrl;
     this.price = _price;
-    this._id = _id;
   }
+}
+
+let newProduct;
+
+btnSave.addEventListener("click", function (e) {
+  e.preventDefault();
+  newProduct = new product(
+    nomeProdotto.value,
+    descrizioneProdotto.value,
+    nomeBrand.value,
+    URLImg.value,
+    parseInt(prezzo.value)
+  );
+  insert();
+  resetForm();
+  extract();
+});
+btnReset.addEventListener("click", function (e) {
+  e.preventDefault();
+  resetForm();
+});
+
+function resetForm() {
+  document.getElementById("myform").reset();
 }
 
 /*document.addEventListener('load', init());
@@ -28,19 +52,77 @@ function init() {
     
 }*/
 
-let arrayProdotti = [];
+//function displayDelete(){
+//    if url
+//}
 
-async function prodotto() {
-  try {
-    let respons = await fetch(URL, {
-      Headers: {
-        Authentication: "URLKey",
-      },
+let arrayProdotti;
+
+function insert() {
+  fetch(URLAddress, {
+    method: "POST",
+    body: JSON.stringify(newProduct),
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: URLKey,
+    },
+  })
+    .then((response) => {
+      if (response.ok) {
+        console.log("it's ok");
+      } else {
+        console.log("no");
+      }
+    })
+    .catch((error) => {
+      console.log(error);
     });
-    let response = await read.json();
-    arrayProdotti = response;
-  } catch (error) {
-    console.log("Errore nel recupero dei dati: ", error);
-    empty.innerText = `Errore nel recupero dei dati: ${error}`;
-  }
+}
+
+function extract() {
+  fetch(URLAddress, {
+    method: "GET",
+    headers: {
+      Authorization: URLKey,
+    },
+  })
+    .then((ress) => {
+      console.log(ress);
+      return ress.json();
+    })
+    .then((data) => {
+      arrayProdotti = data;
+      console.log(arrayProdotti);
+      for (let i = 0; i < arrayProdotti.length; i++) {
+        index = arrayProdotti[0]._id;
+      }
+      console.log(index);
+    })
+    .catch((err) => {
+      console.log(err);
+    });
+}
+let index;
+btnDelete.addEventListener("click", function (e) {
+  e.preventDefault();
+ cancella();
+});
+
+function cancella(){
+    fetch(URLAddress+index, {
+        method: "DELETE",
+        headers: {
+            Authorization: URLKey,
+          },
+    })
+    .then((ress) => {
+        return ress.json();
+      })
+    .then((data) => {
+        arrayProdotti = data;
+        console.log(arrayProdotti);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
 }
